@@ -1,7 +1,12 @@
 // @ts-nocheck
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice } from "@reduxjs/toolkit";
 
-const HARDCODED = { username: 'admin', password: 'password' };
+// ✅ Example hardcoded users (simulate a real API)
+const USERS = [
+  { username: "admin", password: "password", role: "admin" },
+  { username: "manager", password: "password", role: "manager" },
+  { username: "employee", password: "password", role: "employee" },
+];
 
 const initialState = {
   user: null,
@@ -10,8 +15,8 @@ const initialState = {
   isAuthenticated: false,
 };
 
-const slice = createSlice({
-  name: 'auth',
+const authSlice = createSlice({
+  name: "auth",
   initialState,
   reducers: {
     loginSuccess(state, action) {
@@ -35,17 +40,26 @@ const slice = createSlice({
   },
 });
 
-export const { loginSuccess, loginFailure, logout } = slice.actions;
+export const { loginSuccess, loginFailure, logout } = authSlice.actions;
 
+// ✅ Handle login by checking role
 export const login = (username, password) => {
   return (dispatch) => {
-    if (username === HARDCODED.username && password === HARDCODED.password) {
-      const token = 'mock-token-' + Date.now();
-      dispatch(loginSuccess({ user: { username }, token }));
+    const found = USERS.find(
+      (u) => u.username === username && u.password === password
+    );
+    if (found) {
+      const token = "mock-token-" + Date.now();
+      dispatch(
+        loginSuccess({
+          user: { username: found.username, role: found.role },
+          token,
+        })
+      );
     } else {
-      dispatch(loginFailure('Invalid credentials'));
+      dispatch(loginFailure("Invalid credentials"));
     }
   };
 };
 
-export default slice.reducer;
+export default authSlice.reducer;

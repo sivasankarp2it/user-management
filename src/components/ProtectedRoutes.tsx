@@ -1,17 +1,15 @@
-import { Navigate, Outlet } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { Navigate, Outlet } from "react-router-dom";
 
-const ProtectedRoute = () => {
-  const isAuthenticated = useSelector(
-    (state: any) => state.auth.isAuthenticated
-  );
+export default function ProtectedRoute({ roles }: { roles?: string[] }) {
+  const { isAuthenticated, user } = useSelector((s: any) => s.auth);
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+  if (!isAuthenticated) return <Navigate to="/login" />;
+
+  // ✅ Check role access if provided
+  if (roles && !roles.includes(user.role)) {
+    return <Navigate to="/" replace />;
   }
 
-  // 👇 This renders the nested route (like Dashboard, Profile, etc.)
   return <Outlet />;
-};
-
-export default ProtectedRoute;
+}

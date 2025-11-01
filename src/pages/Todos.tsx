@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Paper,
   TextField,
@@ -13,14 +13,11 @@ import {
   Select,
   Snackbar,
   Alert,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   InputAdornment,
   Chip,
+  Tooltip,
 } from "@mui/material";
-import { Edit, Delete, Search } from "@mui/icons-material";
+import { Edit, Delete, Search, Close, Check } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
 import {
   addTask,
@@ -35,7 +32,7 @@ export default function Todos() {
   const dispatch = useDispatch();
   const { values, handleChange, reset, setValues } = useForm({
     title: "",
-    status: "all",
+    status: "pending",
   });
 
   const [editingTask, setEditingTask] = useState<any>(null);
@@ -55,7 +52,7 @@ export default function Todos() {
       t.title.toLowerCase().includes(search.toLowerCase().trim())
     );
 
-  const handleAdd = (e: React.FormEvent) => {
+  const handleAdd = (e: any) => {
     e.preventDefault();
     if (!values.title.trim() || !user) {
       setSnack({
@@ -65,8 +62,7 @@ export default function Todos() {
       });
       return;
     }
-
-    dispatch(addTask(user.username, values.title));
+    dispatch(addTask(user.username, values.title, values.status));
     reset();
     setSnack({
       open: true,
@@ -102,8 +98,6 @@ export default function Todos() {
     });
   };
 
-  const handleCloseSnack = () => setSnack({ ...snack, open: false });
-
   return (
     <Paper sx={{ maxWidth: 700, m: "30px auto", p: 3 }}>
       <Typography variant="h5" mb={2} fontWeight="600">
@@ -129,7 +123,7 @@ export default function Todos() {
         />
         <Select
           name="status"
-          value={values.status}
+          value={values.status || "pending"}
           onChange={(e) =>
             handleChange({
                 target: { name: "status", value: e.target.value },
@@ -183,113 +177,116 @@ export default function Todos() {
           }}
         />
       </Box>
-
-      {/* --- TASK LIST --- */}
-      <List sx={{ mt: 2 }}>
-        {filtered.map((t: any) => (
-          <ListItem
-            key={t.id}
-            sx={{
-              border: "1px solid #eee",
-              borderRadius: 2,
-              mb: 1,
-              boxShadow: 1,
-            }}
-          >
-            <ListItemText
-              primary={t.title}
-              secondary={`Status: ${t.status}`}
+      {filtered.length > 0 ? (
+        <List sx={{ mt: 2, height: 340, overflowY: "auto" }}>
+          {filtered.map((t: any) => (
+            <ListItem
+              key={t.id}
               sx={{
-                textDecoration:
-                  t.status === "completed" ? "line-through" : "none",
+                border: "1px solid #eee",
+                borderRadius: 2,
+                mb: 1,
+                boxShadow: 1,
+                alignItems: "center",
               }}
-            />
-            <Chip
-                label={t.status === "inprogress" ? "In Progress" : t.status}
-                color={
-                t.status === "completed"
-                    ? "success"
-                    : t.status === "inprogress"
-                    ? "warning"
-                    : "default"
-                }
-                size="small"
-                sx={{ mt: 0.5 }}
-            />
-            {/* <Select
-              value={t.status}
-              size="small"
-              onChange={(e) =>
-                dispatch(setStatus({ id: t.id, status: e.target.value }))
-              }
-              sx={{ ml: 2, minWidth: 120 }}
             >
-              <MenuItem value="pending">Pending</MenuItem>
-              <MenuItem value="inprogress">In Progress</MenuItem>
-              <MenuItem value="completed">Completed</MenuItem>
-            </Select> */}
-              <>
-                <IconButton edge="end" onClick={() => setEditingTask(t)}>
-                  <Edit />
-                </IconButton>
-                <IconButton edge="end" onClick={() => handleDelete(t.id)}>
-                  <Delete />
-                </IconButton>
-              </>
+              {editingTask?.id === t.id ? (
+                <Box
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  width="100%"
+                >
+                  <Box flexGrow={1}>
+                    <TextField
+                      size="small"
+                      value={editingTask.title}
+                      onChange={(e) =>
+                        setEditingTask({ ...editingTask, title: e.target.value })
+                      }
+                      sx={{ mr: 1 }}
+                    />
+                    <Select
+                      size="small"
+                      value={editingTask.status}
+                      onChange={(e) =>
+                        setEditingTask({ ...editingTask, status: e.target.value })
+                      }
+                      sx={{ minWidth: 120, mr: 1 }}
+                    >
+                      <MenuItem value="pending">Pending</MenuItem>
+                      <MenuItem value="inprogress">In Progress</MenuItem>
+                      <MenuItem value="completed">Completed</MenuItem>
+                    </Select>
+                  </Box>
+
+                  <Tooltip title="Save">
+                    <IconButton
+                      color="primary"
+                      size="small"
+                      onClick={handleEditSave}
+                      sx={{ mr: 1 }}
+                    >
+                      <Check />
+                    </IconButton>
+                  </Tooltip>
+
+                  <Tooltip title="Cancel">
+                    <IconButton
+                      color="secondary"
+                      size="small"
+                      onClick={() => setEditingTask(null)}
+                    >
+                      <Close />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
+              ) : (
+                <>
+                  <ListItemText
+                    primary={t.title}
+                    secondary={`Status: ${t.status}`}
+                    sx={{
+                      textDecoration:
+                        t.status === "completed" ? "line-through" : "none",
+                    }}
+                  />
+                  <Chip
+                    label={t.status === "inprogress" ? "In Progress" : t.status}
+                    color={
+                      t.status === "completed"
+                        ? "success"
+                        : t.status === "inprogress"
+                        ? "warning"
+                        : "default"
+                    }
+                    size="small"
+                    sx={{ ml: 1, textTransform: "capitalize" }}
+                  />
+                  <IconButton edge="end" onClick={() => setEditingTask(t)}>
+                    <Edit />
+                  </IconButton>
+                  <IconButton edge="end" onClick={() => handleDelete(t.id)}>
+                    <Delete />
+                  </IconButton>
+                </>
+              )}
             </ListItem>
-        ))}
-      </List>
-
-      {!filtered.length && (
-        <Typography align="center" color="text.secondary" mt={3}>
-          No tasks found.
-        </Typography>
+          ))}
+        </List>
+      ) : (
+        <Box height={'240px'} display="flex" alignItems="center" justifyContent="center">
+          <Typography align="center" color="text.secondary" mt={3}>
+            No tasks found.
+          </Typography>
+        </Box>
       )}
-
-      {/* --- EDIT DIALOG --- */}
-      <Dialog
-        open={!!editingTask}
-        onClose={() => setEditingTask(null)}
-        fullWidth
-        maxWidth="xs"
-      >
-        <DialogTitle>Edit Task</DialogTitle>
-        <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          <TextField
-           size="small"
-            label="Task Name"
-            value={editingTask?.title || ""}
-            onChange={(e) =>
-              setEditingTask({ ...editingTask, title: e.target.value })
-            }
-            fullWidth
-          />
-          <Select
-            size="small"
-            value={editingTask?.status || ""}
-            onChange={(e) =>
-              setEditingTask({ ...editingTask, status: e.target.value })
-            }
-            fullWidth
-          >
-            <MenuItem value="pending">Pending</MenuItem>
-            <MenuItem value="inprogress">In Progress</MenuItem>
-            <MenuItem value="completed">Completed</MenuItem>
-          </Select>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setEditingTask(null)}>Cancel</Button>
-          <Button variant="contained" onClick={handleEditSave}>
-            Save
-          </Button>
-        </DialogActions>
-      </Dialog>
 
       {/* --- SNACKBAR --- */}
       <Snackbar
         open={snack.open}
         autoHideDuration={2000}
-        onClose={handleCloseSnack}
+        onClose={() => setSnack({ ...snack, open: false })}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
         <Alert severity={snack.severity as any}>{snack.message}</Alert>

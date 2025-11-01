@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Paper, TextField, Button, Box, Typography } from '@mui/material';
+import { Paper, TextField, Button, Box, Typography, MenuItem, Select, FormControl, InputLabel } from '@mui/material';
 import useForm from '../hooks/useForm';
 import { useDispatch, useSelector } from 'react-redux';
 import { setProfile } from '../store/slices/profileSlice';
@@ -7,9 +7,11 @@ import { setProfile } from '../store/slices/profileSlice';
 export default function Profile() {
   const profile = useSelector((s: any) => s.profile);
   const dispatch = useDispatch();
-  const { values, handleChange } = useForm({
+
+  const { values, handleChange, setValues } = useForm({
     username: profile.username || '',
     email: profile.email || '',
+    role: profile.role || 'employee', // default role
   });
 
   const [errors, setErrors] = useState({ username: '', email: '' });
@@ -38,9 +40,10 @@ export default function Profile() {
     return isValid;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: any) => {
     e.preventDefault();
     if (!validate()) return;
+    console.log('Submitting profile:', values);
     dispatch(setProfile(values));
     alert('Profile updated successfully!');
   };
@@ -50,6 +53,7 @@ export default function Profile() {
       <Typography variant="h5" mb={2}>
         Edit Profile
       </Typography>
+
       <Box component="form" onSubmit={handleSubmit} noValidate>
         <TextField
           label="Username"
@@ -61,6 +65,7 @@ export default function Profile() {
           error={!!errors.username}
           helperText={errors.username}
         />
+
         <TextField
           label="Email"
           name="email"
@@ -71,6 +76,21 @@ export default function Profile() {
           error={!!errors.email}
           helperText={errors.email}
         />
+
+        <FormControl fullWidth margin="normal">
+          <InputLabel>User Role</InputLabel>
+          <Select
+            label="User Role"
+            name="role"
+            value={values.role}
+            onChange={(e) => setValues({ ...values, role: e.target.value })}
+          >
+            <MenuItem value="admin">Admin</MenuItem>
+            <MenuItem value="manager">Manager</MenuItem>
+            <MenuItem value="employee">Employee</MenuItem>
+          </Select>
+        </FormControl>
+
         <Button type="submit" variant="contained" sx={{ mt: 2 }}>
           Save
         </Button>

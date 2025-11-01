@@ -7,7 +7,7 @@ export default function Dashboard() {
   const user = useSelector((s: any) => s.auth.user);
 
   return (
-    <Paper sx={{ maxWidth: 600, m: '0 auto', p: 4, textAlign: 'center' }}>dddd
+    <Paper sx={{ maxWidth: 600, m: '0 auto', p: 4, textAlign: 'center' }}>
       <Typography variant="h4" mb={2}>
         Welcome, {user?.username || 'Guest'} 👋
       </Typography>
