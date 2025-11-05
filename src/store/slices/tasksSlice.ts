@@ -12,7 +12,13 @@ const tasksSlice = createSlice({
       },
       prepare(user: any, title: any, status: any = "pending") {
         return {
-          payload: { id: nanoid(), user, title, status },
+          payload: { 
+            id: nanoid(), 
+            user, 
+            title, 
+            status, 
+            updatedAt: Date.now() 
+          },
         };
       },
     },
@@ -28,7 +34,10 @@ const tasksSlice = createSlice({
 
     editTask(state: any, action: any) {
       const t = state.items.find((i: any) => i.id === action.payload.id);
-      if (t) t.title = action.payload.title;
+      if (t) {
+        t.title = action.payload.title;
+        t.updatedAt = Date.now();
+      }
     },
 
     deleteTask(state: any, action: any) {

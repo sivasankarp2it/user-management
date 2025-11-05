@@ -59,6 +59,7 @@ export default function Login() {
     e.preventDefault();
     if (!validate()) return;
     setLoading(true);
+    console.log('Logging in with', values);
     // @ts-ignore
     dispatch(login(values.username, values.password));
   };
@@ -117,7 +118,7 @@ export default function Login() {
           variant="contained"
           fullWidth
           disabled={loading}
-          sx={{ mt: 2 }}
+          sx={{ mt: 2, height: '45px' }}
         >
           {loading ? 'Logging in...' : 'Login'}
         </Button>

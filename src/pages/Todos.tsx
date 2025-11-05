@@ -50,7 +50,8 @@ export default function Todos() {
     .filter((t: any) => (filter === "all" ? true : t.status === filter))
     .filter((t: any) =>
       t.title.toLowerCase().includes(search.toLowerCase().trim())
-    );
+    )
+    .sort((a: any, b: any) => (b.updatedAt || 0) - (a.updatedAt || 0));
 
   const handleAdd = (e: any) => {
     e.preventDefault();
@@ -96,8 +97,8 @@ export default function Todos() {
       message: "Task updated successfully!",
       severity: "success",
     });
+    console.log('Rendering Todos with items:', items);
   };
-
   return (
     <Paper sx={{ maxWidth: 700, m: "30px auto", p: 3 }}>
       <Typography variant="h5" mb={2} fontWeight="600">

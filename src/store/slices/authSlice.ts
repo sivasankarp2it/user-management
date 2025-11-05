@@ -1,11 +1,18 @@
 // @ts-nocheck
 import { createSlice } from "@reduxjs/toolkit";
 
-// ✅ Example hardcoded users (simulate a real API)
+// ✅ Example hardcoded users (simulating database)
 const USERS = [
-  { username: "admin", password: "password", role: "admin" },
-  { username: "manager", password: "password", role: "manager" },
-  { username: "employee", password: "password", role: "employee" },
+  { username: "admin", password: "password", role: "admin"},
+  { username: "manager1", password: "password", role: "manager" },
+  { username: "manager2", password: "12345", role: "manager" },
+  { username: "employee1", password: "password", role: "employee" },
+  { username: "employee2", password: "password", role: "employee" },
+  { username: "employee3", password: "12345", role: "employee" },
+  { username: "hr1", password: "password", role: "hr" },
+  { username: "developer1", password: "password", role: "developer" },
+  { username: "developer2", password: "password", role: "developer" },
+  { username: "inactiveUser", password: "password", role: "employee", active: false },
 ];
 
 const initialState = {
@@ -42,23 +49,36 @@ const authSlice = createSlice({
 
 export const { loginSuccess, loginFailure, logout } = authSlice.actions;
 
-// ✅ Handle login by checking role
+// ✅ Role-based login simulation
 export const login = (username, password) => {
   return (dispatch) => {
     const found = USERS.find(
       (u) => u.username === username && u.password === password
     );
-    if (found) {
-      const token = "mock-token-" + Date.now();
-      dispatch(
-        loginSuccess({
-          user: { username: found.username, role: found.role },
-          token,
-        })
-      );
-    } else {
-      dispatch(loginFailure("Invalid credentials"));
+
+    // Handle login errors
+    if (!found) {
+      dispatch(loginFailure("Invalid username or password"));
+      return;
     }
+
+    if (found.active === false) {
+      dispatch(loginFailure("Your account is inactive. Contact admin."));
+      return;
+    }
+
+    const token = "mock-token-" + Date.now();
+
+    // Dispatch login success with role info
+    dispatch(
+      loginSuccess({
+        user: {
+          username: found.username,
+          role: found.role,
+        },
+        token,
+      })
+    );
   };
 };
 
